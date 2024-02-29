@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 50px;
+            margin: 20px;
         }
 
         .container {
@@ -83,7 +83,7 @@
 </head>
 <body>
 
-<h1>Card Game with Joker</h1>
+<h1>Sequence</h1>
 <label>Number of Players: 
     <select id="playerCount">
         <option value="3">3</option>
@@ -112,7 +112,7 @@
     </div>
     <div v-if="displayCardsOnHand == true" class="container">
         <div v-for="(card, count) in gameReference.players[0].playerHand" :class="'box' + (count + 1)" style="border:1px solid gray; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff" @click="restackCard(count)">{{ card }}</div>
-        <div class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">Deck</div>
+        <div class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px; color:#fff">Deck</div>
         <div v-if="gameReference.draw[0]" class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">{{ gameReference.draw[0] }}</div>
     </div>
     </template>`
