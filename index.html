@@ -130,7 +130,7 @@
             },
             methods: {
                 myStyle(card) {
-                    return `background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff; background-image: url('/cards/${card.replaceAll(' ','')}.png')`
+                    return `background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
                 },
                 selectCard(count) {
                     this.players = this.gameReference.players.splice(count, 1)
