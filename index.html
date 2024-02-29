@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 20px 10px;
+            margin: 20px 5px;
         }
 
         .container {
@@ -21,7 +21,7 @@
             background-color: rgb(63, 13, 13);
             position: absolute;
             top: 20px;
-            left: 20px;
+            left: 10px;
         }
 
         .box2 {
@@ -30,7 +30,7 @@
             background-color: rgb(37, 37, 112);
             position: absolute;
             top: 60px;
-            left: 20px;
+            left: 10px;
         }
 
         .box3 {
@@ -39,7 +39,7 @@
             background-color: rgb(19, 54, 19);
             position: absolute;
             top: 100px;
-            left: 20px;
+            left: 10px;
         }
  
         .box4 {
@@ -48,7 +48,7 @@
             background-color: rgb(63, 13, 13);;
             position: absolute;
             top: 140px;
-            left: 20px;
+            left: 10px;
         }
 
         .box5 {
@@ -57,7 +57,7 @@
             background-color: rgb(37, 37, 112);;
             position: absolute;
             top: 180px;
-            left: 20px;
+            left: 10px;
         }
 
         .box6 {
@@ -66,7 +66,7 @@
             background-color: rgb(19, 54, 19);;
             position: absolute;
             top: 220px;
-            left: 20px;
+            left: 10px;
         }
 
         
@@ -76,7 +76,7 @@
             background-color: rgb(53, 0, 50);
             position: absolute;
             top: 320px;
-            left: 215px;
+            left: 205px;
         }
     </style>
     <script src="js/vue.js"></script>
@@ -84,7 +84,7 @@
 <body>
 
 <h1>Sequence</h1>
-<label>Number of Players: 
+<label style="display:none">Number of Players: 
     <select id="playerCount">
         <option value="3">3</option>
         <option value="6">6</option>
@@ -92,7 +92,7 @@
     </select>
 </label>
 
-<button id="startButton">Start Game</button>
+<button id="startButton" style="display:none">Start Game</button>
 <div id="players"></div>
 <p id="player1Cards"></p>
 <p id="player2Cards"></p>
