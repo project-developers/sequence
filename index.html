@@ -18,7 +18,6 @@
         .box1 {
             width: 100px;
             height: 100px;
-            background-color: rgb(63, 13, 13);
             position: absolute;
             top: 20px;
             left: 10px;
@@ -27,45 +26,40 @@
         .box2 {
             width: 100px;
             height: 100px;
-            background-color: rgb(37, 37, 112);
             position: absolute;
-            top: 60px;
+            top: 90px;
             left: 10px;
         }
 
         .box3 {
             width: 100px;
             height: 100px;
-            background-color: rgb(19, 54, 19);
             position: absolute;
-            top: 100px;
+            top: 160px;
             left: 10px;
         }
  
         .box4 {
             width: 100px;
             height: 100px;
-            background-color: rgb(63, 13, 13);;
             position: absolute;
-            top: 140px;
+            top: 230px;
             left: 10px;
         }
 
         .box5 {
             width: 100px;
             height: 100px;
-            background-color: rgb(37, 37, 112);;
             position: absolute;
-            top: 180px;
+            top: 300px;
             left: 10px;
         }
 
         .box6 {
             width: 100px;
             height: 100px;
-            background-color: rgb(19, 54, 19);;
             position: absolute;
-            top: 220px;
+            top: 380px;
             left: 10px;
         }
 
@@ -73,7 +67,6 @@
         .deck {
             width: 100px;
             height: 100px;
-            background-color: rgb(53, 0, 50);
             position: absolute;
             top: 320px;
             left: 205px;
@@ -84,7 +77,13 @@
 <body>
 
 <h1>Sequence</h1>
-<label style="display:none">Number of Players: 
+<label >Play Location: 
+    <input type="text" id="playLocation" placeholder="Enter Location" style="width: 100px">
+</label>
+<label >Nickname: 
+    <input type="text" id="nickname" placeholder="Enter Nickname" style="width: 100px">
+</label>
+<label>Number of Players: 
     <select id="playerCount">
         <option value="3">3</option>
         <option value="6">6</option>
@@ -92,14 +91,13 @@
     </select>
 </label>
 
-<button id="startButton" style="display:none">Start Game</button>
+<button id="startButton">Start Game</button>
+<button id="updateButton" style="display: none;">Update Game</button>
 <div id="players"></div>
 <p id="player1Cards"></p>
 <p id="player2Cards"></p>
 <p id="player3Cards"></p>
 <p id="result"></p>
-
-
 
 
 
@@ -111,9 +109,9 @@
         </div>
     </div>
     <div v-if="displayCardsOnHand == true" class="container">
-        <div v-for="(card, count) in gameReference.players[0].playerHand" :class="'box' + (count + 1)" style="border:1px solid gray; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff" @click="restackCard(count)">{{ card }}</div>
-        <div class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px; color:#fff">Deck</div>
-        <div v-if="gameReference.draw[0]" class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">{{ gameReference.draw[0] }}</div>
+        <div v-if="displayCardsOnHand == true" v-for="(card, count) in players[0].playerHand" :class="'box' + (count + 1)" :style="myStyle(card)" @click="restackCard(count)">{{ card }}</div>
+        <div v-if="displayCardsOnHand == true" class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px; color:#fff">Deck</div>
+        <div v-if="displayCardsOnHand == true && gameReference.draw[0]" class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">{{ gameReference.draw[0] }}</div>
     </div>
     </template>`
 
@@ -131,14 +129,19 @@
 
             },
             methods: {
+                myStyle(card) {
+                    return `background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff; background-image: url('/cards/${card}.png')`
+                },
                 selectCard(count) {
-                    this.gameReference.players = [this.gameReference.players[count]]
+                    this.players = this.gameReference.players.splice(count, 1)
                     this.displayCards = false
                     this.displayCardsOnHand = true
+                    updateValue = { "started":true, "players": this.gameReference.players }
+                    document.getElementById('updateButton').click()
                 },
                 restackCard(count) {
-                    const selectedCard = this.gameReference.players[0].playerHand.splice(count, 1)
-                    this.gameReference.players[0].playerHand.push(selectedCard[0])
+                    const selectedCard = this.players[0].playerHand.splice(count, 1)
+                    this.players[0].playerHand.push(selectedCard[0])
                     //this.displayCards = false
                     //this.displayCardsOnHand = true
                 },
@@ -150,6 +153,12 @@
     }
 
     processPlayers()
+
+    document.querySelector('#playLocation').value = localStorage.getItem('playLocation')
+    document.querySelector('#nickname').value = localStorage.getItem('nickname')
+
+    var updateValue = {}
+    
     // Function to create a deck of cards
     function createDeck() {
         const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
@@ -189,10 +198,13 @@
 
     // Function to start the game
     function startGame() {
+        
         deck = createDeck();
         shuffleDeck(deck);
 
         var playerCount = Number(document.querySelector('#playerCount').value)
+        
+
         //players = createPlayers(playerCount)
         //players.length = playerCount
         var deckCount = deck.length - 1
@@ -213,7 +225,7 @@
             players.push({ name: "Player 1", color: "", playerHand: player1Hand })
             players.push({ name: "Player 2", color: "", playerHand: player2Hand })
             players.push({ name: "Player 3", color: "", playerHand: player3Hand })
-
+/*
             for (i = 0; i < playerCount; i++) {
                 document.getElementById('players').innerHTML += `<div style="margin:10px; padding:10px">
                     <div onclick="selectCard(${i})" style="border:1px solid gray; height: 168px; width:120px">${players[i].name}</div>`
@@ -229,7 +241,7 @@
                     document.getElementById('players').innerHTML += `<div class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">Deck</div>`
                     
                     document.getElementById('players').innerHTML += `</div></div>`;
-            }
+            }*/
             //players[1].playerHand = player2Hand
             //players[2].playerHand = player3Hand
 
@@ -258,7 +270,9 @@
             deck: deck,
             draw: [],
             players: players,
-            colors: ["red", "green", "blue"]
+            started: false,
+            colors: ["red", "green", "blue"],
+            playLocation: document.querySelector('#playLocation').value.toLowerCase()
         }
     }
 
@@ -333,38 +347,97 @@
     const deckRef = collection(db, 'deck')
     const drawRef = collection(db, 'draw')
 
-    const unsubDeck = onSnapshot(deckRef, (snapshot) => {
-        let cards = []
-        snapshot.docs.forEach((doc) => {
-            cards.push({ ...doc.data(), id:doc.id })
-        })
-        console.log(cards)
-        if (!playersVue.gameReference.players && cards[0]) {
-            playersVue.gameReference = cards[0]
+    const playLocation = document.querySelector('#playLocation').value
+    /*
+    if (playLocation !== '') {
+        const q = query(deckRef, where("playLocation", "==", playLocation.toLowerCase()))
 
-            //playersVue.players = gameReference.players
-        }
-    })
+        const unsubDeck = onSnapshot(q, (snapshot) => {
+            let cards = []
+            snapshot.docs.forEach((doc) => {
+                cards.push({ ...doc.data(), id:doc.id })
+            })
+            console.log(cards)
+            if (!playersVue.gameReference.players && cards[0]) {
+                playersVue.gameReference = cards[0]
 
-    const unsubDraw = onSnapshot(drawRef, (snapshot) => {
-        let draw = []
-        snapshot.docs.forEach((doc) => {
-            draw.push({ ...doc.data(), id:doc.id })
+                //playersVue.players = gameReference.players
+            }
         })
-        console.log(draw)
-    })
+    }*/
 
     const startButton = document.getElementById('startButton')
 
     startButton.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const playLocation = document.querySelector('#playLocation').value
+        if (playLocation == '') {
+            alert('Please enter a Play Location')
+            return
+        }
+        const nickname = document.querySelector('#nickname').value
+        if (nickname == '') {
+            alert('Please enter a Nickname')
+            return
+        }
+
+        localStorage.setItem('playLocation', playLocation);
+        localStorage.setItem('nickname', nickname);
+
         startGame()
-        addDoc(deckRef, playersVue.gameReference)
-        .then(() => {
-            //console.log("Verified user successfully.");
-        })
+        if (playersVue.gameReference.id) {
+            updateProperties(playersVue.gameReference.id, playersVue.gameReference)
+        } else {
+            addDoc(deckRef, playersVue.gameReference)
+                .then(() => {
+                    
+                })
+        }
 
     })
-/*
+
+    const updateButton = document.getElementById('updateButton')
+
+    updateButton.addEventListener("click", async (e) => {
+        e.preventDefault();
+        updateProperties(playersVue.gameReference.id, updateValue)
+    })
+
+    async function updateProperties(id, properties) {
+        const docRef = doc(db, "deck", id)
+        const snapshot = await updateDoc(docRef, properties)
+    }
+
+    //updateProperties("jjBlNWrjfdhsmdPV4Il8", {"started":true})
+
+    if (document.querySelector('#playLocation').value !== '') {
+        loadDeckStore()
+    }
+
+    var unsubDeck
+
+    function loadDeckStore() {
+        const q = query(deckRef, where("playLocation", "==", playLocation.toLowerCase()))
+
+        unsubDeck = onSnapshot(q, (snapshot) => {
+            let cards = []
+            snapshot.docs.forEach((doc) => {
+                cards.push({ ...doc.data(), id:doc.id })
+            })
+            console.log(cards)
+            if (cards[0]) {
+                if (cards[0]) {
+                    playersVue.gameReference = cards[0]
+                    if (cards[0].players.length == 0) {
+                        document.getElementById('startButton').style.display = ''
+                    } else {
+                        document.getElementById('startButton').style.display = 'none'
+                    }
+                }
+            }
+        })
+    }
+    /*
     let messages = []
     snapshot.docs.forEach((doc) => {
         messages.push({ ...doc.data(), id:doc.id })
