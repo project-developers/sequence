@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Game with Joker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+
+        .container {
+            position: relative;
+        }
+
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(63, 13, 13);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(37, 37, 112);
+            position: absolute;
+            top: 60px;
+            left: 20px;
+        }
+
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(19, 54, 19);
+            position: absolute;
+            top: 100px;
+            left: 20px;
+        }
+ 
+        .box4 {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(63, 13, 13);;
+            position: absolute;
+            top: 140px;
+            left: 20px;
+        }
+
+        .box5 {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(37, 37, 112);;
+            position: absolute;
+            top: 180px;
+            left: 20px;
+        }
+
+        .box6 {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(19, 54, 19);;
+            position: absolute;
+            top: 220px;
+            left: 20px;
+        }
+
+        
+        .deck {
+            width: 100px;
+            height: 100px;
+            background-color: rgb(53, 0, 50);
+            position: absolute;
+            top: 320px;
+            left: 110px;
+        }
+    </style>
+    <script src="js/vue.js"></script>
+</head>
+<body>
+
+<h1>Card Game with Joker</h1>
+<label>Number of Players: 
+    <select id="playerCount">
+        <option value="3">3</option>
+        <option value="6">6</option>
+        <option value="9">9</option>
+    </select>
+</label>
+
+<button id="startButton">Start Game</button>
+<div id="players"></div>
+<p id="player1Cards"></p>
+<p id="player2Cards"></p>
+<p id="player3Cards"></p>
+<p id="result"></p>
+
+
+
+
+
+<script>
+    document.querySelector('#players').innerHTML = `<template>
+    <div v-if="displayCards == true">
+        <div v-for="(player, count) in gameReference.players" style="margin:10px; padding:10px; cursor:pointer">
+            <div @click="selectCard(count)" style="border:1px solid gray; height: 168px; width:120px">{{ player.name }}</div>
+        </div>
+    </div>
+    <div v-if="displayCardsOnHand == true" class="container">
+        <div v-for="(card, count) in gameReference.players[0].playerHand" :class="'box' + (count + 1)" style="border:1px solid gray; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff" @click="restackCard(count)">{{ card }}</div>
+        <div class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">Deck</div>
+        <div v-if="gameReference.draw[0]" class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">{{ gameReference.draw[0] }}</div>
+    </div>
+    </template>`
+
+    function processPlayers() {
+
+        playersVue = new Vue({
+            el: document.querySelector('#players'),
+            data: {
+                displayCards: true,
+                displayCardsOnHand: false,
+                players: [],
+                gameReference: {},
+            },
+            computed: {
+
+            },
+            methods: {
+                selectCard(count) {
+                    this.gameReference.players = [this.gameReference.players[count]]
+                    this.displayCards = false
+                    this.displayCardsOnHand = true
+                },
+                restackCard(count) {
+                    const selectedCard = this.gameReference.players[0].playerHand.splice(count, 1)
+                    this.gameReference.players[0].playerHand.push(selectedCard[0])
+                    //this.displayCards = false
+                    //this.displayCardsOnHand = true
+                },
+                mode() {
+                    return 'w3-bar-item w3-button ' + mode.replace('w3-card ','')
+                },
+            }
+        })
+    }
+
+    processPlayers()
+    // Function to create a deck of cards
+    function createDeck() {
+        const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'];
+        const deck = [];
+
+        for (const suit of suits) {
+            for (const value of values) {
+                deck.push(`${value} of ${suit}`);
+            }
+        }
+
+        // Add Joker to the deck
+        //deck.push('Joker');
+
+        return deck.concat(deck);
+    }
+
+    // Function to shuffle the deck
+    function shuffleDeck(deck) {
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+    }
+
+    var players = [], deck = [], gameReference
+
+    function createPlayers(count) {
+        var allPlayers = []
+        var player = {name: "", color: "", playerHand: []}
+        for (i = 0; i < count; i++) {
+            allPlayers.push(player)
+        }
+        return allPlayers
+    }
+
+    // Function to start the game
+    function startGame() {
+        deck = createDeck();
+        shuffleDeck(deck);
+
+        var playerCount = Number(document.querySelector('#playerCount').value)
+        //players = createPlayers(playerCount)
+        //players.length = playerCount
+        var deckCount = deck.length - 1
+
+        if (playerCount == 3) {
+            const player1Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+            const player2Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+            const player3Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+
+            
+            
+            /*
+            document.getElementById('player1Cards').innerText = `Player 1's Cards: ${player1Hand.join(', ')}`;
+            document.getElementById('player2Cards').innerText = `Player 2's Cards: ${player2Hand.join(', ')}`;
+            document.getElementById('player3Cards').innerText = `Player 3's Cards: ${player3Hand.join(', ')}`;
+            */
+
+            players.push({ name: "Player 1", color: "", playerHand: player1Hand })
+            players.push({ name: "Player 2", color: "", playerHand: player2Hand })
+            players.push({ name: "Player 3", color: "", playerHand: player3Hand })
+
+            for (i = 0; i < playerCount; i++) {
+                document.getElementById('players').innerHTML += `<div style="margin:10px; padding:10px">
+                    <div onclick="selectCard(${i})" style="border:1px solid gray; height: 168px; width:120px">${players[i].name}</div>`
+                    
+                    document.getElementById('players').innerHTML += `<div class="container">`
+                    
+                    var j = 1
+                    players[i].playerHand.forEach(element => {
+                        document.getElementById('players').innerHTML += `<div class="box${j}" style="border:1px solid gray; margin:10px; height: 268.8px; width:192px">${element}</div>`
+                        j++
+                    });
+                    
+                    document.getElementById('players').innerHTML += `<div class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">Deck</div>`
+                    
+                    document.getElementById('players').innerHTML += `</div></div>`;
+            }
+            //players[1].playerHand = player2Hand
+            //players[2].playerHand = player3Hand
+
+            /*for (i = 0; i < playerCount; i++) {
+                const playerHand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]
+                players[i].playerHand = playerHand
+                for (j = 0; j < 6; j++) {
+                    console.log(i, j)
+                    players[i].playerHand = deck[deckCount]
+                    //deckCount--
+                }
+            }*/
+        } else if (playerCount == 6) {
+
+        } else if (playerCount == 9) {
+
+        } 
+
+        //const 
+        //const total = calculateTotal(playerHand);
+
+        //document.getElementById('players').innerText = `Total: ${total}`;
+
+        // document.getElementById('result').innerText = `Total: ${total}`;
+        playersVue.gameReference = {
+            deck: deck,
+            draw: [],
+            players: players,
+            colors: ["red", "green", "blue"]
+        }
+    }
+
+    function selectCard(count) {
+        console.log(count)
+        gameReference.players = [gameReference.players[count]]
+    }
+
+    // Function to calculate the total value of cards, considering Joker as 10
+    function calculateTotal(hand) {
+        let total = 0;
+
+        for (const card of hand) {
+            if (card.includes('Joker')) {
+                total += 10;
+            } else {
+                const value = parseInt(card) || (card.includes('Ace') ? 11 : 10);
+                total += value;
+            }
+        }
+
+        return total;
+    }
+</script>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+    import { 
+        getFirestore, collection, getDocs, onSnapshot,
+        addDoc, deleteDoc, doc,
+        query, where,
+        orderBy, serverTimestamp,
+        getDoc, updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    import { 
+        getAuth,
+        createUserWithEmailAndPassword,
+        signOut, signInWithEmailAndPassword,
+        onAuthStateChanged,
+        sendEmailVerification 
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1Jn59NnAkobr9LJN1hleP90LRQWHX6fg",
+      authDomain: "sequence-13bf0.firebaseapp.com",
+      projectId: "sequence-13bf0",
+      storageBucket: "sequence-13bf0.appspot.com",
+      messagingSenderId: "87264207089",
+      appId: "1:87264207089:web:0098a1738fec04693e0950",
+      measurementId: "G-8SYRSLT773"
+    };
+  
+    // Initialize Firebase
+    //const app = initializeApp(firebaseConfig);
+    //const analytics = getAnalytics(app);
+
+    // Initialize Firebase
+    initializeApp(firebaseConfig);
+
+    // init services
+    const db = getFirestore()
+    //const auth = getAuth()
+
+    // collection ref
+    const deckRef = collection(db, 'deck')
+    const drawRef = collection(db, 'draw')
+
+    const unsubDeck = onSnapshot(deckRef, (snapshot) => {
+        let cards = []
+        snapshot.docs.forEach((doc) => {
+            cards.push({ ...doc.data(), id:doc.id })
+        })
+        console.log(cards)
+        if (!playersVue.gameReference.players && cards[0]) {
+            playersVue.gameReference = cards[0]
+
+            //playersVue.players = gameReference.players
+        }
+    })
+
+    const unsubDraw = onSnapshot(drawRef, (snapshot) => {
+        let draw = []
+        snapshot.docs.forEach((doc) => {
+            draw.push({ ...doc.data(), id:doc.id })
+        })
+        console.log(draw)
+    })
+
+    const startButton = document.getElementById('startButton')
+
+    startButton.addEventListener("click", async (e) => {
+        startGame()
+        addDoc(deckRef, playersVue.gameReference)
+        .then(() => {
+            //console.log("Verified user successfully.");
+        })
+
+    })
+/*
+    let messages = []
+    snapshot.docs.forEach((doc) => {
+        messages.push({ ...doc.data(), id:doc.id })
+    })*/
+  </script>
+
+</body>
+</html>
