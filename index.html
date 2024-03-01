@@ -27,7 +27,7 @@
             width: 100px;
             height: 100px;
             position: absolute;
-            top: 90px;
+            top: 72px;
             left: 10px;
         }
 
@@ -35,7 +35,7 @@
             width: 100px;
             height: 100px;
             position: absolute;
-            top: 160px;
+            top: 124px;
             left: 10px;
         }
  
@@ -43,7 +43,7 @@
             width: 100px;
             height: 100px;
             position: absolute;
-            top: 230px;
+            top: 176px;
             left: 10px;
         }
 
@@ -51,7 +51,7 @@
             width: 100px;
             height: 100px;
             position: absolute;
-            top: 300px;
+            top: 228px;
             left: 10px;
         }
 
@@ -59,7 +59,7 @@
             width: 100px;
             height: 100px;
             position: absolute;
-            top: 380px;
+            top: 280px;
             left: 10px;
         }
 
@@ -69,6 +69,14 @@
             height: 100px;
             position: absolute;
             top: 320px;
+            left: 205px;
+        }
+
+        .draw {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 20px;
             left: 205px;
         }
     </style>
@@ -84,14 +92,13 @@
     <input type="text" id="nickname" placeholder="Enter Nickname" style="width: 100px">
 </label>
 <label>Number of Players: 
-    <select id="playerCount">
-        <option value="3">3</option>
-        <option value="6">6</option>
-        <option value="9">9</option>
-    </select>
+    <input type="number" id="playerCount" readonly>
 </label>
 
-<button id="startButton">Start Game</button>
+<button id="joinButton">Join Game</button>
+
+
+<button id="startButton" style="display: none;">Start Game</button>
 <button id="updateButton" style="display: none;">Update Game</button>
 <div id="players"></div>
 <p id="player1Cards"></p>
@@ -104,14 +111,17 @@
 <script>
     document.querySelector('#players').innerHTML = `<template>
     <div v-if="displayCards == true">
+        <div id="selectColor">
+            <label v-for="color in gameReference.colors"><input type="radio" name="radioGroup" :value="color">{{ color }}</label>
+        </div>
         <div v-for="(player, count) in gameReference.players" style="margin:10px; padding:10px; cursor:pointer">
             <div @click="selectCard(count)" style="border:1px solid gray; height: 168px; width:120px">{{ player.name }}</div>
         </div>
     </div>
     <div v-if="displayCardsOnHand == true" class="container">
-        <div v-if="displayCardsOnHand == true" v-for="(card, count) in players[0].playerHand" :class="'box' + (count + 1)" :style="myStyle(card)" @click="restackCard(count)">{{ card }}</div>
-        <div v-if="displayCardsOnHand == true" class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px; color:#fff">Deck</div>
-        <div v-if="displayCardsOnHand == true && gameReference.draw[0]" class="deck" style="border:1px solid gray; margin:10px; height: 168px; width:120px">{{ gameReference.draw[0] }}</div>
+        <div v-if="displayCardsOnHand == true" v-for="(card, count) in players[0].playerHand" :class="'box' + (count + 1)" :style="myStyle(card)" @click="restackCard(count)"></div>
+        <div v-if="displayCardsOnHand == true" class="draw" :style="drawStyle()"></div>
+        <div v-if="displayCardsOnHand == true && gameReference.draw[0]" class="deck" :style="deckStyle(gameReference.draw[0])"></div>
     </div>
     </template>`
 
@@ -123,21 +133,40 @@
                 displayCards: true,
                 displayCardsOnHand: false,
                 players: [],
+                player: {},
                 gameReference: {},
             },
             computed: {
 
             },
             methods: {
+                drawStyle(card) {
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; color:#fff; background-image: url('/sequence/cards/back.png')`
+                },
+                deckStyle(card) {
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; color:#fff; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
+                },
                 myStyle(card) {
-                    return `background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
                 },
                 selectCard(count) {
+                    if (!getSelectedOption()) {
+                        alert('Please select a color')
+                        return
+                    }
                     this.players = this.gameReference.players.splice(count, 1)
                     this.displayCards = false
                     this.displayCardsOnHand = true
-                    updateValue = { "started":true, "players": this.gameReference.players }
-                    document.getElementById('updateButton').click()
+                    if (this.gameReference.currentUserCount + 1 < allPlayers.length) {
+                        updateValue = { "started":true, "players": this.gameReference.players, "currentUserCount": this.gameReference.currentUserCount + 1, colors: this.gameReference.colors.filter(elem=>elem !== getSelectedOption()) }
+                        this.player.color = getSelectedOption()
+                        document.getElementById('updateButton').click()
+                    } else {
+                        updateValue = { "started":true, "players": this.gameReference.players, "currentUserCount": 0, colors: this.gameReference.colors.filter(elem=>elem !== getSelectedOption()) }
+                        this.player.color = getSelectedOption()
+                        document.getElementById('updateButton').click()
+                    }
+                    
                 },
                 restackCard(count) {
                     const selectedCard = this.players[0].playerHand.splice(count, 1)
@@ -154,6 +183,20 @@
 
     processPlayers()
 
+    function getSelectedOption() {
+        var radioButtons = document.getElementsByName("radioGroup");
+
+        for (var i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                var selectedOption = radioButtons[i].value;
+                console.log("Selected Option: " + selectedOption);
+                return selectedOption;
+            }
+        }
+
+        console.log("No option selected");
+    }
+
     document.querySelector('#playLocation').value = localStorage.getItem('playLocation')
     document.querySelector('#nickname').value = localStorage.getItem('nickname')
 
@@ -161,13 +204,13 @@
     
     // Function to create a deck of cards
     function createDeck() {
-        const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
-        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'];
+        const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
         const deck = [];
 
         for (const suit of suits) {
             for (const value of values) {
-                deck.push(`${value} of ${suit}`);
+                deck.push(`${suit}_${value}`);
             }
         }
 
@@ -185,7 +228,7 @@
         }
     }
 
-    var players = [], deck = [], gameReference
+    var players = [], deck = [], gameReference, allPlayers = []
 
     function createPlayers(count) {
         var allPlayers = []
@@ -222,9 +265,9 @@
             document.getElementById('player3Cards').innerText = `Player 3's Cards: ${player3Hand.join(', ')}`;
             */
 
-            players.push({ name: "Player 1", color: "", playerHand: player1Hand })
-            players.push({ name: "Player 2", color: "", playerHand: player2Hand })
-            players.push({ name: "Player 3", color: "", playerHand: player3Hand })
+            players.push({ name: "Player 1", color: "red", playerHand: player1Hand })
+            players.push({ name: "Player 2", color: "green", playerHand: player2Hand })
+            players.push({ name: "Player 3", color: "blue", playerHand: player3Hand })
 /*
             for (i = 0; i < playerCount; i++) {
                 document.getElementById('players').innerHTML += `<div style="margin:10px; padding:10px">
@@ -266,12 +309,14 @@
         //document.getElementById('players').innerText = `Total: ${total}`;
 
         // document.getElementById('result').innerText = `Total: ${total}`;
-        playersVue.gameReference = {
+        gameReference = {
             deck: deck,
             draw: [],
             players: players,
+            startedBy: document.querySelector('#nickname').value.toLowerCase(),
+            currentUserCount: 0,
             started: false,
-            colors: ["red", "green", "blue"],
+            colors: ["Red", "Green", "Blue"],
             playLocation: document.querySelector('#playLocation').value.toLowerCase()
         }
     }
@@ -296,6 +341,34 @@
 
         return total;
     }
+
+    // Function to create and append radio buttons
+    function createRadioButtons(containerId, options) {
+    var container = document.getElementById(containerId);
+
+    options.forEach(function(option) {
+        var radioBtn = document.createElement("input");
+        radioBtn.type = "radio";
+        radioBtn.name = "radioGroup"; // All radio buttons with the same name belong to the same group
+        radioBtn.value = option.value;
+
+        var label = document.createElement("label");
+        label.appendChild(radioBtn);
+        label.appendChild(document.createTextNode(option.label));
+
+        container.appendChild(label);
+    });
+    }
+
+    // Example options
+    var radioOptions = [
+        { value: "red", label: "Red" },
+        { value: "green", label: "Green" },
+        { value: "blue", label: "Blue" }
+    ];
+
+    // Call the function to create and append radio buttons
+    //createRadioButtons("selectColor", radioOptions);
 </script>
 
 <script type="module">
@@ -345,9 +418,9 @@
 
     // collection ref
     const deckRef = collection(db, 'deck')
-    const drawRef = collection(db, 'draw')
+    const playersRef = collection(db, 'players')
 
-    const playLocation = document.querySelector('#playLocation').value
+    //const playLocation = document.querySelector('#playLocation').value
     /*
     if (playLocation !== '') {
         const q = query(deckRef, where("playLocation", "==", playLocation.toLowerCase()))
@@ -366,9 +439,9 @@
         })
     }*/
 
-    const startButton = document.getElementById('startButton')
+    const joinButton = document.getElementById('joinButton')
 
-    startButton.addEventListener("click", async (e) => {
+    joinButton.addEventListener("click", async (e) => {
         e.preventDefault();
         const playLocation = document.querySelector('#playLocation').value
         if (playLocation == '') {
@@ -381,42 +454,64 @@
             return
         }
 
-        localStorage.setItem('playLocation', playLocation);
-        localStorage.setItem('nickname', nickname);
+        //localStorage.setItem('playLocation', playLocation);
+        //localStorage.setItem('nickname', nickname);
 
-        startGame()
-        if (playersVue.gameReference.id) {
-            updateProperties(playersVue.gameReference.id, playersVue.gameReference)
-        } else {
-            addDoc(deckRef, playersVue.gameReference)
-                .then(() => {
-                    
-                })
+        document.getElementById('joinButton').style.display = 'none'
+
+        if (!unsubPlayers) {
+            loadPlayerStore()
         }
 
     })
 
+    const startButton = document.getElementById('startButton')
+
+    startButton.addEventListener("click", async (e) => {
+        e.preventDefault();
+        
+
+        //localStorage.setItem('playLocation', playLocation);
+        //localStorage.setItem('nickname', nickname);
+/*
+        if (!unsubDeck) {
+            loadDeckStore()
+        }*/
+
+        startGame()
+        
+        if (playersVue.gameReference.id) {
+            updateProperties(playersVue.gameReference.id, "deck", gameReference)
+            players = []
+        } else {
+            addDoc(deckRef, gameReference)
+                .then(() => {
+                    players = []
+                })
+        }
+
+    })
     const updateButton = document.getElementById('updateButton')
 
     updateButton.addEventListener("click", async (e) => {
         e.preventDefault();
-        updateProperties(playersVue.gameReference.id, updateValue)
+        updateProperties(playersVue.gameReference.id, "deck", updateValue)
     })
 
-    async function updateProperties(id, properties) {
-        const docRef = doc(db, "deck", id)
+    async function updateProperties(id, store, properties) {
+        const docRef = doc(db, store, id)
         const snapshot = await updateDoc(docRef, properties)
     }
-
-    //updateProperties("jjBlNWrjfdhsmdPV4Il8", {"started":true})
 
     if (document.querySelector('#playLocation').value !== '') {
         loadDeckStore()
     }
 
-    var unsubDeck
+    var unsubDeck, unsubPlayers
 
     function loadDeckStore() {
+        const playLocation = document.querySelector('#playLocation').value
+
         const q = query(deckRef, where("playLocation", "==", playLocation.toLowerCase()))
 
         unsubDeck = onSnapshot(q, (snapshot) => {
@@ -426,16 +521,61 @@
             })
             console.log(cards)
             if (cards[0]) {
-                if (cards[0]) {
+                document.getElementById('startButton').style.display = 'none'
+                const found = allPlayers.findIndex(elem=>elem.nickname == cards[0].startedBy)
+                const starter = allPlayers.splice(found, 1)
+                allPlayers.push(starter[0])
+                if (allPlayers[cards[0].currentUserCount].nickname == document.querySelector('#nickname').value.toLowerCase() ) {
                     playersVue.gameReference = cards[0]
-                    if (cards[0].players.length == 0) {
-                        document.getElementById('startButton').style.display = ''
-                    } else {
-                        document.getElementById('startButton').style.display = 'none'
-                    }
+                    
                 }
+                if (cards[0].players.length == 0) {
+                    updateProperties(playersVue.player.id, "players", { "ready": "done" })
+                    allPlayers = []
+                } else {
+                    //document.getElementById('startButton').style.display = ''
+                }
+                
             }
         })
+        
+    }
+
+    function loadPlayerStore() {
+        const playLocation = document.querySelector('#playLocation').value
+        const nickname = document.querySelector('#nickname').value
+        
+        const q = query(playersRef, where("playLocation", "==", playLocation.toLowerCase()))
+
+        unsubPlayers = onSnapshot(q, (snapshot) => {
+            let users = []
+            snapshot.docs.forEach((doc) => {
+                users.push({ ...doc.data(), id:doc.id })
+            })
+            console.log(users)
+            document.querySelector('#playerCount').value = users.filter(elem=>elem.ready == true).length
+            if (document.querySelector('#playerCount').value == 3 || document.querySelector('#playerCount').value == 6 || document.querySelector('#playerCount').value == 9) {
+                document.getElementById('startButton').style.display = ''
+                allPlayers = users.filter(elem=>elem.ready == true)
+            } else {
+                document.getElementById('startButton').style.display = 'none'
+            }
+            const found = users.findIndex(elem=>elem.nickname == nickname.toLowerCase())
+            if (found !== -1) {
+                if (!playersVue.player.id) {
+                    //console.log(users[found])
+                    updateProperties(users[found].id, "players", { "ready": true })
+                    loadDeckStore()
+                }
+                playersVue.player = users.filter(elem=>elem.nickname == nickname.toLowerCase())[0]
+            } else {
+                addDoc(playersRef, { "nickname": nickname.toLowerCase(), "playLocation": playLocation.toLowerCase(), "ready": true })
+                    .then(() => {
+                        loadDeckStore()
+                    })
+            }
+        })
+        
     }
     /*
     let messages = []
