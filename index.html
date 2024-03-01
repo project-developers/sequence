@@ -92,7 +92,7 @@
         body {
             background-position: center;
             background-size: cover;
-            background-image: url("../sequence/cards/background.png");
+            background-image: url("../cards/background.png");
             min-height: 100%;
             opacity: 2;
         }
@@ -110,7 +110,7 @@
     <input type="text" id="nickname" placeholder="Enter Nickname" style="width: 100px">
 </label>
 <label>Number of Players: 
-    <input type="number" id="playerCount" readonly>
+    <input type="number" id="playerCount" style="width: 50px" readonly>
 </label>
 
 <button id="joinButton">Join Game</button>
@@ -205,19 +205,19 @@
                     
                 },
                 selectStyle() {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/back.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; height: 168px; width:120px; cursor:pointer; background-image: url('/cards/back.png')`
                 },
                 playStyle() {
                     return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 50px; width:120px; cursor:pointer; background-color: #fff`
                 },
                 drawStyle() {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/back.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/cards/back.png')`
                 },
                 deckStyle(card) {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/cards/${card.replaceAll(' ','')}.png')`
                 },
                 myStyle(card) {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; background-image: url('/cards/${card.replaceAll(' ','')}.png')`
                 },
                 selectCard(count) {
                     if (!getSelectedOption()) {
@@ -383,11 +383,11 @@
             deck: deck,
             draw: [],
             players: players,
-            startedBy: document.querySelector('#nickname').value.toLowerCase(),
+            startedBy: document.querySelector('#nickname').value.toLowerCase().trim(),
             currentUserCount: 0,
             started: false,
             colors: ["Red", "Green", "Blue"],
-            playLocation: document.querySelector('#playLocation').value.toLowerCase()
+            playLocation: document.querySelector('#playLocation').value.toLowerCase().trim()
         }
     }
 
@@ -524,8 +524,11 @@
             return
         }
 
-        //localStorage.setItem('playLocation', playLocation);
-        //localStorage.setItem('nickname', nickname);
+        document.querySelector('#playLocation').readOnly = true
+        document.querySelector('#nickname').readOnly = true
+
+        localStorage.setItem('playLocation', playLocation);
+        localStorage.setItem('nickname', nickname);
 
         document.getElementById('joinButton').style.display = 'none'
 
@@ -573,16 +576,17 @@
         const snapshot = await updateDoc(docRef, properties)
     }
 
+    /*
     if (document.querySelector('#playLocation').value !== '') {
         loadDeckStore()
-    }
+    }*/
 
     var unsubDeck, unsubPlayers
 
     function loadDeckStore() {
         const playLocation = document.querySelector('#playLocation').value
 
-        const q = query(deckRef, where("playLocation", "==", playLocation.toLowerCase()))
+        const q = query(deckRef, where("playLocation", "==", playLocation.toLowerCase().trim()))
 
         unsubDeck = onSnapshot(q, (snapshot) => {
             let cards = []
@@ -600,7 +604,7 @@
                     
                     updateProperties(cards[0].id, "deck", gameReference)
                     players = []
-                } else if (allPlayers[cards[0].currentUserCount].nickname == document.querySelector('#nickname').value.toLowerCase() ) {
+                } else if (allPlayers[cards[0].currentUserCount].nickname == document.querySelector('#nickname').value.toLowerCase().trim() ) {
                     playersVue.gameReference = cards[0]
                     playersVue.showDeck = true
                     if (cards[0].players.length == 0) {
@@ -641,7 +645,7 @@
         const playLocation = document.querySelector('#playLocation').value
         const nickname = document.querySelector('#nickname').value
         
-        const q = query(playersRef, where("playLocation", "==", playLocation.toLowerCase()))
+        const q = query(playersRef, where("playLocation", "==", playLocation.toLowerCase().trim()))
 
         unsubPlayers = onSnapshot(q, (snapshot) => {
             let users = []
@@ -656,16 +660,16 @@
             } else {
                 document.getElementById('startButton').style.display = 'none'
             }
-            const found = users.findIndex(elem=>elem.nickname == nickname.toLowerCase())
+            const found = users.findIndex(elem=>elem.nickname == nickname.toLowerCase().trim())
             if (found !== -1) {
                 if (!playersVue.player.id) {
                     //console.log(users[found])
                     updateProperties(users[found].id, "players", { "ready": true })
                     loadDeckStore()
                 }
-                playersVue.player = users.filter(elem=>elem.nickname == nickname.toLowerCase())[0]
+                playersVue.player = users.filter(elem=>elem.nickname == nickname.toLowerCase().trim())[0]
             } else {
-                addDoc(playersRef, { "nickname": nickname.toLowerCase(), "playLocation": playLocation.toLowerCase(), "ready": true })
+                addDoc(playersRef, { "nickname": nickname.toLowerCase().trim(), "playLocation": playLocation.toLowerCase().trim(), "ready": true })
                     .then(() => {
                         loadDeckStore()
                     })
