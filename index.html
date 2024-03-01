@@ -68,7 +68,7 @@
             width: 100px;
             height: 100px;
             position: absolute;
-            top: 320px;
+            top: 20px;
             left: 205px;
         }
 
@@ -76,9 +76,27 @@
             width: 100px;
             height: 100px;
             position: absolute;
-            top: 20px;
+            top: 320px;
             left: 205px;
         }
+
+        .play {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 220px;
+            left: 205px;
+        }
+
+        /* Full height image header */
+        body {
+            background-position: center;
+            background-size: cover;
+            background-image: url("../cards/background.png");
+            min-height: 100%;
+            opacity: 2;
+        }
+
     </style>
     <script src="js/vue.js"></script>
 </head>
@@ -112,15 +130,20 @@
     document.querySelector('#players').innerHTML = `<template>
     <div v-if="displayCards == true">
         <div id="selectColor">
-            <label v-for="color in gameReference.colors"><input type="radio" name="radioGroup" :value="color">{{ color }}</label>
+            <label v-for="(color, count) in gameReference.colors"><input type="radio" name="radioGroup" :value="color" :checked="count == 0">{{ color }}</label>
         </div>
         <div v-for="(player, count) in gameReference.players" style="margin:10px; padding:10px; cursor:pointer">
-            <div @click="selectCard(count)" style="border:1px solid gray; height: 168px; width:120px">{{ player.name }}</div>
+            <div @click="selectCard(count)" :style="selectStyle()"></div>
         </div>
     </div>
     <div v-if="displayCardsOnHand == true" class="container">
         <div v-if="displayCardsOnHand == true" v-for="(card, count) in players[0].playerHand" :class="'box' + (count + 1)" :style="myStyle(card)" @click="restackCard(count)"></div>
-        <div v-if="displayCardsOnHand == true" class="draw" :style="drawStyle()"></div>
+        <div v-if="displayCardsOnHand == true && allPlayers()[gameReference.currentUserCount].nickname == player.nickname" class="play" :style="playStyle()">
+            <button @click="play()">Play</button>
+            <br>
+            <button @click="win()">Win</button>    
+        </div>
+        <div v-if="displayCardsOnHand == true && allPlayers()[getPlayer()].nickname == player.nickname && showDeck == true && gameReference.draw.length !== 0 && winCount == false" class="draw" :style="drawStyle()" @click="addDeck()"></div>
         <div v-if="displayCardsOnHand == true && gameReference.draw[0]" class="deck" :style="deckStyle(gameReference.draw[0])"></div>
     </div>
     </template>`
@@ -134,20 +157,67 @@
                 displayCardsOnHand: false,
                 players: [],
                 player: {},
+                showDeck: false,
+                winCount: false,
                 gameReference: {},
             },
             computed: {
 
             },
             methods: {
-                drawStyle(card) {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; color:#fff; background-image: url('/sequence/cards/back.png')`
+                play() {
+                    this.gameReference.draw.unshift(this.players[0].playerHand.pop())
+                    if (this.gameReference.currentUserCount == allPlayers.length - 1) {
+                        updateValue = { "draw": this.gameReference.draw, "currentUserCount": 0 }
+                        document.getElementById('updateButton').click()
+                    } else {
+                        updateValue = { "draw": this.gameReference.draw, "currentUserCount": this.gameReference.currentUserCount + 1 }
+                        document.getElementById('updateButton').click()
+                    }
+                },
+                win() {
+                    this.gameReference.draw.unshift(this.players[0].playerHand.pop())
+                    if (this.gameReference.currentUserCount == allPlayers.length - 1) {
+                        updateValue = { "draw": this.gameReference.draw, "currentUserCount": 0, "deck": this.gameReference.deck.concat(this.players[0].playerHand.splice(0, this.players[0].playerHand.length)) }
+                        this.winCount = true
+                        document.getElementById('updateButton').click()
+                    } else {
+                        updateValue = { "draw": this.gameReference.draw, "currentUserCount": this.gameReference.currentUserCount + 1, "deck": this.gameReference.deck.concat(this.players[0].playerHand.splice(0, this.players[0].playerHand.length)) }
+                        this.winCount = true
+                        document.getElementById('updateButton').click()
+                    }
+                },
+                addDeck() {
+                    this.players[0].playerHand.push(this.gameReference.deck.pop())
+                    updateValue = { "deck": this.gameReference.deck }
+                    document.getElementById('updateButton').click()
+                    this.showDeck = false
+                },
+                allPlayers() {
+                    return allPlayers
+                },
+                getPlayer() {
+                    if (this.gameReference.currentUserCount == 0) {
+                        return allPlayers.length - 1
+                    } else {
+                        return this.gameReference.currentUserCount - 1
+                    }
+                    
+                },
+                selectStyle() {
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/back.png')`
+                },
+                playStyle() {
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 50px; width:120px; cursor:pointer; background-color: #fff`
+                },
+                drawStyle() {
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/back.png')`
                 },
                 deckStyle(card) {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; color:#fff; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
                 },
                 myStyle(card) {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; color:#fff; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
                 },
                 selectCard(count) {
                     if (!getSelectedOption()) {
@@ -525,16 +595,42 @@
                 const found = allPlayers.findIndex(elem=>elem.nickname == cards[0].startedBy)
                 const starter = allPlayers.splice(found, 1)
                 allPlayers.push(starter[0])
-                if (allPlayers[cards[0].currentUserCount].nickname == document.querySelector('#nickname').value.toLowerCase() ) {
-                    playersVue.gameReference = cards[0]
+                if (allPlayers[0] == undefined) {
+                    startGame()
                     
+                    updateProperties(cards[0].id, "deck", gameReference)
+                    players = []
+                } else if (allPlayers[cards[0].currentUserCount].nickname == document.querySelector('#nickname').value.toLowerCase() ) {
+                    playersVue.gameReference = cards[0]
+                    playersVue.showDeck = true
+                    if (cards[0].players.length == 0) {
+                        updateProperties(playersVue.player.id, "players", { "ready": "done", "color": playersVue.players[0].color })
+                    }
+                    if (playersVue.winCount == true) {
+                        if (cards[0].currentUserCount == allPlayers.length - 1) {
+                            updateValue = { "currentUserCount": 0 }
+                            document.getElementById('updateButton').click()
+                        } else {
+                            updateValue = { "currentUserCount": cards[0].currentUserCount + 1 }
+                            document.getElementById('updateButton').click()
+                        }
+                    }
+                } else {
+                    playersVue.gameReference.currentUserCount = cards[0].currentUserCount
+                    playersVue.gameReference.deck = cards[0].deck
+                    playersVue.gameReference.draw = cards[0].draw
+
+                    if (cards[0].players.length == 0) {
+                        updateProperties(playersVue.player.id, "players", { "ready": "done", "color": playersVue.players[0].color })
+                        
+                    }
                 }
-                if (cards[0].players.length == 0) {
-                    updateProperties(playersVue.player.id, "players", { "ready": "done" })
-                    allPlayers = []
+                /*if (cards[0].players.length == 0) {
+                    updateProperties(playersVue.player.id, "players", { "ready": "done", "color": playersVue.players[0].color })
+                    
                 } else {
                     //document.getElementById('startButton').style.display = ''
-                }
+                }*/
                 
             }
         })
