@@ -92,7 +92,7 @@
         body {
             background-position: center;
             background-size: cover;
-            background-image: url("../cards/background.png");
+            background-image: url("../sequence/cards/background.png");
             min-height: 100%;
             opacity: 2;
         }
@@ -244,19 +244,19 @@
                     
                 },
                 selectStyle() {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; height: 168px; width:120px; cursor:pointer; background-image: url('/cards/back.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/back.png')`
                 },
                 playStyle() {
                     return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 87px; width:120px; cursor:pointer; background-color: #fff`
                 },
                 drawStyle() {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/cards/back.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/back.png')`
                 },
                 deckStyle(card) {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/cards/${card.replaceAll(' ','')}.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 168px; width:120px; cursor:pointer; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
                 },
                 myStyle(card) {
-                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; background-image: url('/cards/${card.replaceAll(' ','')}.png')`
+                    return `border:1px solid gray; background-position: center; border-radius: 8px; background-size: cover; margin:10px; height: 268.8px; width:192px; cursor:pointer; background-image: url('/sequence/cards/${card.replaceAll(' ','')}.png')`
                 },
                 selectCard(count) {
                     if (!getSelectedOption()) {
