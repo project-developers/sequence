@@ -624,7 +624,7 @@
             if (cards[0]) {
                 document.getElementById('startButton').style.display = 'none'
                 if (cards[0].gameOver == true) {
-                    playersVue.gameReference.deck = cards[0].deck
+                    playersVue.gameReference.draw = cards[0].draw
                     unsubPlayers()
                     unsubDeck()
                     const playersDocRef = doc(db, 'players', playersVue.player.id)
