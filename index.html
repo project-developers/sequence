@@ -182,43 +182,52 @@
                 play() {
                     this.gameReference.draw.unshift(this.players[0].playerHand.pop())
                     if (this.gameReference.currentUserCount == allPlayers.length - 1) {
-                        updateValue = { "draw": this.gameReference.draw, "currentUserCount": 0, "played": true }
+                        updateValue = { "deck": this.gameReference.deck, "draw": this.gameReference.draw, "currentUserCount": 0, "played": true }
                         document.getElementById('updateButton').click()
                     } else {
-                        updateValue = { "draw": this.gameReference.draw, "currentUserCount": this.gameReference.currentUserCount + 1, "played": true }
+                        updateValue = { "deck": this.gameReference.deck, "draw": this.gameReference.draw, "currentUserCount": this.gameReference.currentUserCount + 1, "played": true }
                         document.getElementById('updateButton').click()
                     }
                 },
                 win() {
-                    var allColors = ["Red", "Blue", "Green"]
-                    this.gameReference.draw.unshift(this.players[0].playerHand.pop())
-                    if (this.gameReference.currentUserCount == allPlayers.length - 1) {
-                        updateValue = { "draw": this.gameReference.draw, "currentUserCount": 0, "deck": this.gameReference.deck.concat(this.players[0].playerHand.splice(0, this.players[0].playerHand.length)), "played": true }
-                        updateValue[`${this.player.color}Win`] = true
-                        if (this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[0]}Win`] == true || this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[1]}Win`] == true) {
-                            updateValue.gameOver = true
-                        }
-                        this.winCount = true
-                        document.getElementById('updateButton').click()
-                        if (this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[0]}Win`] == true || this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[1]}Win`] == true) {
-                            document.getElementById('deleteButton').click()
-                        }
-                    } else {
-                        updateValue = { "draw": this.gameReference.draw, "currentUserCount": this.gameReference.currentUserCount + 1, "deck": this.gameReference.deck.concat(this.players[0].playerHand.splice(0, this.players[0].playerHand.length)), "played": true }
-                        updateValue[`${this.player.color}Win`] = true
-                        if (this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[0]}Win`] == true || this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[1]}Win`] == true) {
-                            updateValue.gameOver = true
-                        }
-                        this.winCount = true
-                        document.getElementById('updateButton').click()
-                        if (this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[0]}Win`] == true || this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[1]}Win`] == true) {
-                            document.getElementById('deleteButton').click()
-                        }
+                    if (confirm('Press "OK" to confirm Win')) {
+                        var allColors = ["Red", "Blue", "Green"]
+                        this.gameReference.draw.unshift(this.players[0].playerHand.pop())
+                        if (this.gameReference.currentUserCount == allPlayers.length - 1) {
+                            updateValue = { "draw": this.gameReference.draw, "currentUserCount": 0, "deck": this.gameReference.deck.concat(this.players[0].playerHand.splice(0, this.players[0].playerHand.length)), "played": true }
+                            updateValue[`${this.player.color}Win`] = true
+                            if (this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[0]}Win`] == true || this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[1]}Win`] == true) {
+                                updateValue.gameOver = true
+                            }
+                            this.winCount = true
+                            document.getElementById('updateButton').click()
+                            if (this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[0]}Win`] == true || this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[1]}Win`] == true) {
+                                document.getElementById('deleteButton').click()
+                            }
+                        } else {
+                            updateValue = { "draw": this.gameReference.draw, "currentUserCount": this.gameReference.currentUserCount + 1, "deck": this.gameReference.deck.concat(this.players[0].playerHand.splice(0, this.players[0].playerHand.length)), "played": true }
+                            updateValue[`${this.player.color}Win`] = true
+                            if (this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[0]}Win`] == true || this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[1]}Win`] == true) {
+                                updateValue.gameOver = true
+                            }
+                            this.winCount = true
+                            document.getElementById('updateButton').click()
+                            if (this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[0]}Win`] == true || this.gameReference[`${allColors.filter(elem=>elem !== this.player.color)[1]}Win`] == true) {
+                                document.getElementById('deleteButton').click()
+                            }
+                        }   
                     }
                 },
                 addDeck() {
                     this.players[0].playerHand.push(this.gameReference.deck.pop())
-                    updateValue = { "deck": this.gameReference.deck }
+                    if (this.gameReference.deck.length == 1) {
+                        var resetDeck = this.gameReference.draw.slice(1, this.gameReference.draw.length)
+                        shuffleDeck(resetDeck)
+                        resetDeck.push(this.gameReference.deck[0])
+                        updateValue = { "deck": resetDeck, "draw": [this.gameReference.draw[0]] }
+                    } else {
+                        updateValue = { "deck": this.gameReference.deck, "draw": this.gameReference.draw }
+                    }
                     document.getElementById('updateButton').click()
                     this.showDeck = false
                 },
@@ -291,12 +300,12 @@
         for (var i = 0; i < radioButtons.length; i++) {
             if (radioButtons[i].checked) {
                 var selectedOption = radioButtons[i].value;
-                console.log("Selected Option: " + selectedOption);
+                //console.log("Selected Option: " + selectedOption);
                 return selectedOption;
             }
         }
 
-        console.log("No option selected");
+        //console.log("No option selected");
     }
 
     function getSelectedIndex() {
@@ -305,12 +314,12 @@
         for (var i = 0; i < radioButtons.length; i++) {
             if (radioButtons[i].checked) {
                 var selectedOption = radioButtons[i].value;
-                console.log("Selected Option: " + selectedOption);
+                //console.log("Selected Option: " + selectedOption);
                 return i;
             }
         }
 
-        console.log("No option selected");
+        //console.log("No option selected");
     }
 
     document.querySelector('#playLocation').value = localStorage.getItem('playLocation')
@@ -365,7 +374,7 @@
 
         var colors = []
 
-        if (playerCount == 3) {
+        if (playerCount > 2 && playerCount < 6) {
             const player1Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
             const player2Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
             const player3Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
@@ -379,8 +388,9 @@
                 {count: 1, color: "Blue"},
                 {count: 2, color: "Green"},
             ]
+            allPlayers.length = 3
             
-        } else if (playerCount == 6) {
+        } else if (playerCount > 5 && playerCount < 9) {
             const player1Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
             const player2Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
             const player3Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
@@ -403,7 +413,9 @@
                 {count: 4, color: "Red"},
                 {count: 5, color: "Green"}
             ]
-        } else if (playerCount == 9) {
+            allPlayers.length = 6
+
+        } else if (playerCount > 9) {
             const player1Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop()];
             const player2Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop()];
             const player3Hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop()];
@@ -435,6 +447,8 @@
                 {count: 7, color: "Blue"},
                 {count: 8, color: "Green"}
             ]
+            allPlayers.length = 9
+
         } 
 
         gameReference = {
@@ -442,7 +456,7 @@
             draw: [],
             players: players,
             startedBy: document.querySelector('#nickname').value.toLowerCase().trim(),
-            currentUserCount: Number(`${playersVue.startCount + 1 == allPlayers.length ? 0 : playersVue.startCount + 1}`),
+            currentUserCount: Number(`${playersVue.startCount + 1 >= allPlayers.length ? 0 : playersVue.startCount + 1}`),
             started: false,
             played: false,
             colors: colors,
@@ -556,7 +570,7 @@
     })
 
     async function updateProperties(id, store, properties) {
-        console.log(id, store, properties)
+        //console.log(id, store, properties)
         if (store == 'players' && properties.ready == true) {
             playersVue.startCount = allPlayers.length - 1
         }
@@ -574,7 +588,7 @@
         const deckDocRef = doc(db, 'deck', playersVue.gameReference.id)
         deleteDoc(deckDocRef)
             .then(() => {
-                console.log('Deck Deleted')
+                //console.log('Deck Deleted')
                 playersVue.gameReference.currentUserCount = playersVue.gameReference.currentUserCount + 1
             })
     })
@@ -605,16 +619,17 @@
             snapshot.docs.forEach((doc) => {
                 cards.push({ ...doc.data(), id:doc.id })
             })
-            console.log(cards)
+            //console.log(cards)
             if (cards[0]) {
                 document.getElementById('startButton').style.display = 'none'
                 if (cards[0].gameOver == true) {
+                    playersVue.gameReference.deck = cards[0].deck
                     unsubPlayers()
                     unsubDeck()
                     const playersDocRef = doc(db, 'players', playersVue.player.id)
                     deleteDoc(playersDocRef)
                         .then(() => {
-                            console.log('Person Deleted')
+                            //console.log('Person Deleted')
                             document.getElementById('restartButton').style.display = ''
                             document.querySelector('#playerCount').innerHTML = ``
                         })
@@ -675,7 +690,7 @@
             snapshot.docs.forEach((doc) => {
                 users.push({ ...doc.data(), id:doc.id })
             })
-            console.log(users)
+            //console.log(users)
 
             if (users.filter(elem=>elem.ready == "done").length !== 0 && playersVue.gameReference.started == true) {
                 return
